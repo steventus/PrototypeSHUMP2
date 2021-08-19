@@ -20,5 +20,9 @@ public class Charger_Behaviour_Fire : Behaviour_Fire
             
     }
 
+    public void Behaviour2()
+    {        
+        ArcFire(60, 8);
 
+    }
 }

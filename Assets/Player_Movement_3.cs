@@ -4,30 +4,29 @@ using UnityEngine;
 public class Player_Movement_3 : Base_Entity
 {
     public int speed;
-    public float dashSpeed;
-    public float dashDecayMultiplier;
-    public float dashThreshold;
 
     private Rigidbody2D thisBody;
     private Vector3 moveDir;
-    private Vector3 dashDir;
-    private float finalDashSpeed;
-
-    private bool readyToPerfect = true;
-    [SerializeField] private int currentPrimary = 0;
-    [SerializeField] private int currentSecondary = 0;
 
     public float assaultRate;
     [HideInInspector] public enum State
     {
         neutral,
-        dashing,
-        afterparry,
         dead
     }
 
     private bool isInvulnerable = false;
     [HideInInspector] public State thisState;
+
+
+    private enum FeverState
+    {
+        neutral,
+        fever
+    }
+
+    private FeverState thisFeverState;
+
 
     private Player_EngineBehaviour thisEngineAnimator;
 
@@ -41,9 +40,8 @@ public class Player_Movement_3 : Base_Entity
         thisBody = GetComponent<Rigidbody2D>();
         thisEngineAnimator = GetComponent<Player_EngineBehaviour>();
 
-        finalDashSpeed = dashSpeed;
+        thisFeverState = FeverState.neutral;
 
-        ReturnToNeutral();
     }
 
     void Update()
@@ -56,19 +54,7 @@ public class Player_Movement_3 : Base_Entity
                 float _inputx = Input.GetAxisRaw("Horizontal");
                 float _inputy = Input.GetAxisRaw("Vertical");
                 moveDir = new Vector2(_inputx, _inputy) * speed;
-
-
-                //Receive input for rolling
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    dashDir = moveDir;
-
-                    if (dashDir.magnitude > 0)
-                    {
-                        dashSpeed = finalDashSpeed;
-                        thisState = State.dashing;
-                    }
-                }
+                
                 #endregion
 
                 #region PlayerEngineAnimation
@@ -86,32 +72,14 @@ public class Player_Movement_3 : Base_Entity
                 if (Input.GetKey(KeyCode.Mouse0) && (Time.time > GetComponent<Behaviour_Fire>().previousTimeFired + 1 / GetComponent<Behaviour_Fire>().fireRate))
                 {
                     GetComponent<Behaviour_Fire>().previousTimeFired = Time.time;
+                    GetComponent<Behaviour_Fire>().Fire();
 
-                    switch (currentPrimary)
-                    {
-                        case 0: //Assault
-                            GetComponent<Behaviour_Fire>().Fire();
-                            foreach (Behaviour_Fire _secondaries in GetComponentsInChildren<Behaviour_Fire>())
-                                _secondaries.Fire();
-
-                            break;
-                    }
-
+                    if (thisFeverState == FeverState.fever)
+                    foreach (Behaviour_Fire _secondaries in GetComponentsInChildren<Behaviour_Fire>())
+                        _secondaries.Fire();
                 }
                 #endregion
-                break;
-
-            case State.dashing:
-                dashSpeed -= dashSpeed * dashDecayMultiplier * Time.deltaTime;
-
-
-                if (dashSpeed < dashThreshold)
-                    ReturnToNeutral();
-                break;
-
-
-            case State.afterparry:
-                break;
+                break;            
                     
             case State.dead:
                 break;
@@ -129,10 +97,6 @@ public class Player_Movement_3 : Base_Entity
                 thisBody.velocity = moveDir; //Set to FixedUpdate for consistent physics update
                 break;
 
-            case State.dashing:
-                thisBody.velocity = dashDir.normalized * dashSpeed;
-                break;
-
             case State.dead:
                 thisBody.velocity = new Vector2(0, 0);
                 break;
@@ -141,20 +105,6 @@ public class Player_Movement_3 : Base_Entity
 
     }
 
-
-
-    private void ReturnToNeutral()
-    {
-        thisState = State.neutral;
-        isInvulnerable = false;
-    }
-
-    
-
-    public void ChangeInvulnerable (bool _state)
-    {
-        isInvulnerable = _state;
-    }
 
     public void AtomBomb()
     {
@@ -169,5 +119,17 @@ public class Player_Movement_3 : Base_Entity
         base.TakeDamage(_damage);
     }
 
+    public void isFever(bool _state)
+    {
+        switch (_state)
+        {
+            case true:
+                thisFeverState = FeverState.fever;
+                break;
 
+            case false:
+                thisFeverState = FeverState.neutral;
+                break;
+        }
+    }
 }

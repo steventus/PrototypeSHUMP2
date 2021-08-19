@@ -37,8 +37,10 @@ public class Charger_Enemy : Entity_Enemy
 
     }
 
-    private void FixedUpdate()
+    public override void FixedUpdate()
     {
+        base.FixedUpdate();
+
         thisBody.AddForce((targetPosition - transform.position) * speed, ForceMode2D.Force);
 
         if (thisBody.velocity.magnitude >= maxSpeed)
@@ -52,11 +54,27 @@ public class Charger_Enemy : Entity_Enemy
 
     protected IEnumerator BurstFire()
     {
+
         startFire = false;
-        GetComponent<Charger_Behaviour_Fire>().Behaviour1();
-        yield return new WaitForSeconds(1/fireRate);
+
+        switch (thisFeverState)
+        {
+            case FeverState.fever:
+                GetComponent<Charger_Behaviour_Fire>().Behaviour1();
+                yield return new WaitForSeconds(1 / (2 * fireRate));
+                GetComponent<Charger_Behaviour_Fire>().Behaviour2();
+                yield return new WaitForSeconds(1 / (2 * fireRate));
+                break;
+
+            case FeverState.neutral:
+                GetComponent<Charger_Behaviour_Fire>().Behaviour1();
+                yield return new WaitForSeconds(1 / fireRate);
+                break;
+        }
+
         startFire = true;
-        
+
+
     }
 
     private IEnumerator Moving()

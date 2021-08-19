@@ -87,7 +87,7 @@ public class Behaviour_Bullet : MonoBehaviour
 
         foreach (Animator _childAnimator in GetComponentsInChildren<Animator>())
         {
-            AnimatorUpdate(_childAnimator, "Exploded");
+            //AnimatorUpdate(_childAnimator, "Exploded");
         
             
             thisBody.velocity = new Vector2(0, 0);

@@ -27,6 +27,21 @@ public class Entity_Enemy : Base_Entity
 
     [SerializeField] protected State thisState;
 
+    protected enum FeverState
+    {
+        neutral,
+        fever
+    }
+
+    protected FeverState thisFeverState;
+
+    //Fever
+    public float maxFever;
+    public float feverRegenRate;
+    [SerializeField]private float currentFever = 0;
+    private int feverIndex;
+
+
     //Movement
     public bool loopRoute = false;
     [SerializeField] private Vector3 desiredPosition;
@@ -65,6 +80,7 @@ public class Entity_Enemy : Base_Entity
 
         oldSprite = GetComponent<SpriteRenderer>().sprite;
 
+        thisFeverState = FeverState.neutral;
     }
 
     void InitialisePositions()
@@ -90,7 +106,6 @@ public class Entity_Enemy : Base_Entity
         }
     }
 
-    // Update is called once per frame
     public virtual void Update()
     {
         switch (thisState)
@@ -178,6 +193,34 @@ public class Entity_Enemy : Base_Entity
     }
 
 
+    public virtual void FixedUpdate()
+    {
+        //Counting Fever
+
+        switch (thisFeverState)
+        {
+            case FeverState.neutral:
+                if (feverIndex >= 60 / feverRegenRate)
+                    AddFever(1);
+
+                break;
+
+            case FeverState.fever:                
+                break;
+        }
+
+
+        feverIndex++;
+    }
+
+    public void AddFever(float _number)
+    {
+        currentFever += _number;
+        
+        if (currentFever >= maxFever)
+            isFever(true);
+    }
+    
     void UpdateNextDesiredPosition()
     {        
         desiredPosition = listOfPositions[0];
@@ -324,6 +367,20 @@ public class Entity_Enemy : Base_Entity
         {
             _player.TakeDamage(10);
             Death();
+        }
+    }
+
+    public virtual void isFever(bool _state)
+    {
+        switch (_state)
+        {
+            case true:
+                thisFeverState = FeverState.fever;
+                break;
+
+            case false:
+                thisFeverState = FeverState.neutral;
+                break;
         }
     }
 

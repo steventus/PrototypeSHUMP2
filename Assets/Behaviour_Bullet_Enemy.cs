@@ -15,13 +15,7 @@ public class Behaviour_Bullet_Enemy : Behaviour_Bullet
         }
 
         else if (collision.TryGetComponent(out Player_Movement_3 _player))
-        {
-            if (canBeParried && _player.thisState == Player_Movement_3.State.dashing)
-            {
-                _player.ChangeInvulnerable(true);
-                BulletCollided();
-                return;
-            }
+        {           
 
             //Debug.Log(collision.gameObject.name);
 

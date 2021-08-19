@@ -9,9 +9,11 @@ public class Zipper_Enemy : Entity_Enemy
     [SerializeField] private float radiusToMove;
     [SerializeField] private float timeToMove;
 
+
     protected override void Start()
     {
         base.Start();
+
         originalPosition = transform.position;
     }
 
@@ -21,14 +23,18 @@ public class Zipper_Enemy : Entity_Enemy
 
         //Get Random Position
         Vector3 _desiredPosition = originalPosition + new Vector3(Random.insideUnitCircle.x, Random.insideUnitCircle.y, 0) * radiusToMove;
+        
+
 
         if (thisState == State.Waiting)
             StartCoroutine(Moving(_desiredPosition));
 
     }
 
-    private void FixedUpdate()
+    public override void FixedUpdate()
     {
+        base.FixedUpdate();
+
         thisBody.AddForce((targetPosition - transform.position).normalized * speed, ForceMode2D.Force);
 
         if (thisBody.velocity.magnitude >= maxSpeed)
@@ -58,4 +64,14 @@ public class Zipper_Enemy : Entity_Enemy
         //Debug.Log("Waiting");
         yield return null;
     }
+    public override void isFever(bool _state)
+    {
+        base.isFever(_state);
+
+        if (thisFeverState == FeverState.fever)
+        {
+            timeToMove *= 0.5f; //Decrease time to move by half, effectively making them more berserked and hypwer
+        }
+    }
+
 }
